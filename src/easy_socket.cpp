@@ -229,6 +229,28 @@ int EasySocket::accept()
     return (int)m_replySocket;
 }
 
+int EasySocket::select()
+{
+    if(!checkSocket(m_socket)) return -1;
+    fd_set set;
+    struct timeval timeout;
+    int rv;
+    FD_ZERO(&set); /* clear the set */
+    FD_SET(m_socket, &set); /* add our file descriptor to the set */
+
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
+
+    rv = ::select(m_socket + 1, &set, NULL, NULL, &timeout);
+
+    if(rv > 0)
+    {
+        this->accept();
+    }
+
+    return rv;
+}
+
 bool EasySocket::setAddress(const char *serv, uint16_t portno)
 {
     server = gethostbyname(serv);

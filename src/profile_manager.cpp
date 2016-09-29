@@ -773,6 +773,7 @@ void ProfileManager::startListenSignalToCapture()
 void ProfileManager::stopListenSignalToCapture()
 {
     m_stopListen.store(true, std::memory_order_release);
+    socket.flush();
     if (m_listenThread.joinable())
         m_listenThread.join();
     m_isAlreadyListened = false;
@@ -786,17 +787,25 @@ void ProfileManager::listen()
 {
     EASY_THREAD("EasyProfiler.Listen");
 
-    EasySocket socket;
+
     profiler::net::Message replyMessage(profiler::net::MESSAGE_TYPE_REPLY_START_CAPTURING);
 
     socket.bind(profiler::DEFAULT_PORT);
+
+
+
     int bytes = 0;
     while (!m_stopListen.load(std::memory_order_acquire))
     {
         bool hasConnect = false;
 
         socket.listen();
-        socket.accept();
+        int select = socket.select();
+        if (select == 0){
+            continue;
+        }else if(select  < 0 ){
+            break;
+        }
 
         EASY_EVENT("ClientConnected", profiler::colors::White, profiler::OFF);
         hasConnect = true;

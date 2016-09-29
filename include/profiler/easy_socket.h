@@ -83,6 +83,8 @@ public:
     int receive(void *buf, size_t nbyte);
     int listen(int count=5);
     int accept();
+    int select();
+
     int bind(uint16_t portno);
 
     bool setAddress(const char* serv, uint16_t port);

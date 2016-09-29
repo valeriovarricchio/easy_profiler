@@ -345,6 +345,8 @@ class ProfileManager
     std::atomic_bool                m_isEnabled;
     std::atomic_bool    m_isEventTracingEnabled;
 
+    EasySocket socket;
+
 #ifndef _WIN32
     std::string m_csInfoFilename = "/tmp/cs_profiling_info.log";
 #endif
