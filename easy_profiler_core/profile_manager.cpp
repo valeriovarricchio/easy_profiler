@@ -273,6 +273,12 @@ extern "C" {
         MANAGER.storeBlock(_desc, _runtimeName);
     }
 
+    PROFILER_API void storeBlockDirectly(profiler::Block* block)
+    {
+        MANAGER.storeBlockDirectly(block);
+    }
+
+
     PROFILER_API void beginBlock(Block& _block)
     {
         MANAGER.beginBlock(_block);
@@ -799,6 +805,35 @@ bool ProfileManager::storeBlock(const profiler::BaseBlockDescriptor* _desc, cons
     b.m_end = b.m_begin;
 
     THIS_THREAD->storeBlock(b);
+
+    return true;
+}
+
+bool ProfileManager::storeBlockDirectly(profiler::Block* block)
+{
+    if(!block)
+        return false;
+
+    const auto state = m_profilerStatus.load(std::memory_order_acquire);
+    if (state == EASY_PROF_DISABLED || !(block->m_status & profiler::ON))
+        return false;
+
+    if (state == EASY_PROF_DUMP)
+    {
+        if (THIS_THREAD == nullptr || THIS_THREAD->blocks.openedList.empty())
+            return false;
+    }
+    else if (THIS_THREAD == nullptr)
+    {
+        THIS_THREAD = &threadStorage(getCurrentThreadId());
+    }
+
+#if EASY_ENABLE_BLOCK_STATUS != 0
+    if (!THIS_THREAD->allowChildren && !(block->m_status & FORCE_ON_FLAG))
+        return false;
+#endif
+    THIS_THREAD->storeBlock(*block);
+
 
     return true;
 }

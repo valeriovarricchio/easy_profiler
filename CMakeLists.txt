@@ -43,5 +43,6 @@ add_subdirectory(easy_profiler_core)
 add_subdirectory(profiler_gui)
 
 add_subdirectory(sample)
+add_subdirectory(sample/custom_block)
 add_subdirectory(reader)
 

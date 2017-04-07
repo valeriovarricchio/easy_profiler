@@ -494,7 +494,7 @@ namespace profiler {
         const char*       m_name;
         EasyBlockStatus m_status;
 
-    private:
+    public:
 
         void start();
         void start(timestamp_t _time);
@@ -503,8 +503,6 @@ namespace profiler {
         inline bool finished() const { return m_end >= m_begin; }
         inline EasyBlockStatus status() const { return m_status; }
         inline void setStatus(EasyBlockStatus _status) { m_status = _status; }
-
-    public:
 
         Block(Block&& that);
         Block(const BaseBlockDescriptor* _desc, const char* _runtimeName);
@@ -556,6 +554,8 @@ namespace profiler {
         \ingroup profiler
         */
         PROFILER_API void storeEvent(const BaseBlockDescriptor* _desc, const char* _runtimeName);
+
+        PROFILER_API void storeBlockDirectly(profiler::Block* block);
 
         /** Begins block.
 

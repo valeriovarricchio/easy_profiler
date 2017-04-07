@@ -416,6 +416,7 @@ public:
                                                             bool _copyName = false);
 
     bool storeBlock(const profiler::BaseBlockDescriptor* _desc, const char* _runtimeName);
+    bool storeBlockDirectly(profiler::Block* block);
     void beginBlock(profiler::Block& _block);
     void endBlock();
     profiler::timestamp_t maxFrameDuration();
