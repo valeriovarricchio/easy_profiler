@@ -2,20 +2,20 @@
 
 class Foo
 {
-    const ::profiler::BaseBlockDescriptor* m_desk;
-    ::profiler::Block custom_block;
+    const ::profiler::BaseBlockDescriptor* m_desc;
+    ::profiler::Block m_customBlock;
 public:
-    Foo():m_desk(::profiler::registerDescription(
+    Foo():m_desc(::profiler::registerDescription(
                      ::profiler::extract_enable_flag(),
                      "main.cpp" ":" "6","custom_block","main.cpp", 6,
                                                      ::profiler::BLOCK_TYPE_EVENT,
                                                      ::profiler::extract_color(profiler::colors::Red))),
-        custom_block(m_desk,"custom_block")
+        m_customBlock(m_desc,"custom_block")
     {}
 
     void init()
     {
-        custom_block.start();
+        m_customBlock.start();
         /* some another work*/
     }
 
@@ -27,8 +27,8 @@ public:
 
     void check()
     {
-        custom_block.finish();
-        ::profiler::storeBlockDirectly(&custom_block);//store finished block
+        m_customBlock.finish();
+        ::profiler::storeBlockDirectly(&m_customBlock);//store finished block
         /* some another work*/
     }
 };
