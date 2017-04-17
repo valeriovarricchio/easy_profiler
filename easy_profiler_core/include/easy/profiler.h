@@ -44,6 +44,7 @@ The Apache License, Version 2.0 (the "License");
 #define EASY_PROFILER_H
 
 #include <easy/profiler_aux.h>
+#include <string.h>
 
 #if defined ( __clang__ )
 # pragma clang diagnostic push
@@ -486,7 +487,7 @@ namespace profiler {
 
     //***********************************************
 
-    class PROFILER_API Block EASY_FINAL : public BaseBlockData
+    class PROFILER_API Block : public BaseBlockData
     {
         friend ::ProfileManager;
         friend ::ThreadStorage;
@@ -494,7 +495,7 @@ namespace profiler {
         const char*       m_name;
         EasyBlockStatus m_status;
 
-    private:
+    protected:
 
         void start();
         void start(timestamp_t _time);
@@ -520,6 +521,127 @@ namespace profiler {
         Block& operator = (const Block&) = delete;
 
     }; // END of class Block.
+
+    //***********************************************
+
+    enum ArbitraryType : uint8_t
+    {
+        ARBITRARY_TYPE_INT8 = 0,
+        ARBITRARY_TYPE_UINT8,
+
+        ARBITRARY_TYPE_INT16,
+        ARBITRARY_TYPE_UINT16,
+
+        ARBITRARY_TYPE_INT32,
+        ARBITRARY_TYPE_UINT32,
+
+        ARBITRARY_TYPE_INT64,
+        ARBITRARY_TYPE_UINT64,
+
+        ARBITRARY_TYPE_FLOAT,
+        ARBITRARY_TYPE_DOUBLE
+    };
+
+
+    class PROFILER_API ArbitraryBlock : public Block
+    {
+        friend ::ProfileManager;
+        friend ::ThreadStorage;
+
+        //TODO yse: make it templatefuly
+
+        class ArbitraryTypeValue
+        {
+            ArbitraryType m_type;
+            const char* m_value = nullptr;
+
+            const char* m_data = nullptr;
+
+            ~ArbitraryTypeValue()
+            {
+                delete [] m_value;
+                delete [] m_data;
+            }
+
+            uint8_t sizeOfValue(ArbitraryType type)
+            {
+                switch (type) {
+                    case ARBITRARY_TYPE_INT8: return 1;
+                    case ARBITRARY_TYPE_UINT8: return 1;
+
+                    case ARBITRARY_TYPE_INT16: return 2;
+                    case ARBITRARY_TYPE_UINT16: return 2;
+
+                    case ARBITRARY_TYPE_INT32: return 4;
+                    case ARBITRARY_TYPE_UINT32: return 4;
+
+                    case ARBITRARY_TYPE_INT64: return 8;
+                    case ARBITRARY_TYPE_UINT64: return 8;
+
+                    case ARBITRARY_TYPE_FLOAT: return 4;
+                    case ARBITRARY_TYPE_DOUBLE: return 8;
+
+                    default:
+                        return 1;
+                }
+                return 1;
+            }
+
+        public:
+            const char* serialize(){
+                if(!m_data){
+                    m_data = new char[size()];
+                }
+                memcpy((void*)m_data,&m_type,1);
+                memcpy((void*)(m_data+1),m_value,sizeOfValue(m_type));
+                return m_data;
+            }
+
+            uint8_t size()
+            {
+                return 1 + sizeOfValue(m_type);
+            }
+            template <class T>
+            void fillValue(T value)
+            {
+                if(!m_value)
+                    m_value = new char[sizeof(T)];
+
+                memset(m_value,&value,sizeof(T));
+
+            }
+
+            template <class T>
+            void setValue(T value)
+            {
+
+                if (std::is_same<T, uint8_t>::value)      { m_type = ARBITRARY_TYPE_INT8; fillValue(value); }
+                else if (std::is_same<T, uint8_t>::value) { m_type = ARBITRARY_TYPE_UINT8; fillValue(value); }
+
+                else if (std::is_same<T, int16_t>::value) { m_type = ARBITRARY_TYPE_INT16; fillValue(value); }
+                else if (std::is_same<T, uint16_t>::value) { m_type = ARBITRARY_TYPE_UINT16; fillValue(value); }
+
+                else if (std::is_same<T, int32_t>::value) { m_type = ARBITRARY_TYPE_INT32; fillValue(value); }
+                else if (std::is_same<T, uint32_t>::value) { m_type = ARBITRARY_TYPE_UINT32; fillValue(value); }
+
+                else if (std::is_same<T, int64_t>::value) { m_type = ARBITRARY_TYPE_INT64; fillValue(value); }
+                else if (std::is_same<T, uint64_t>::value) { m_type = ARBITRARY_TYPE_UINT64; fillValue(value); }
+
+                else if (std::is_same<T, float>::value) { m_type = ARBITRARY_TYPE_FLOAT; fillValue(value); }
+                else if (std::is_same<T, double>::value) { m_type = ARBITRARY_TYPE_DOUBLE; fillValue(value); }
+
+
+            }
+        };
+
+        uint32_t m_countOfValues;
+        ArbitraryTypeValue* m_array = nullptr;
+
+    private:
+
+        ArbitraryBlock(const ArbitraryBlock&) = delete;
+        ArbitraryBlock& operator = (const ArbitraryBlock&) = delete;
+    };
 
     //***********************************************
 
