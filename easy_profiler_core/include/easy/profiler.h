@@ -656,7 +656,7 @@ namespace profiler {
             void setValue(T value)
             {
 
-                if (std::is_same<T, uint8_t>::value)      { m_type = ARBITRARY_TYPE_INT8; fillValue(value); }
+                if (std::is_same<T, int8_t>::value)      { m_type = ARBITRARY_TYPE_INT8; fillValue(value); }
                 else if (std::is_same<T, uint8_t>::value) { m_type = ARBITRARY_TYPE_UINT8; fillValue(value); }
 
                 else if (std::is_same<T, int16_t>::value) { m_type = ARBITRARY_TYPE_INT16; fillValue(value); }
