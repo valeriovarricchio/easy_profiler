@@ -567,7 +567,9 @@ namespace profiler {
 
     enum ArbitraryType : uint8_t
     {
-        ARBITRARY_TYPE_INT8 = 0,
+        ARBITRARY_TYPE_BOOL = 0,
+
+        ARBITRARY_TYPE_INT8,
         ARBITRARY_TYPE_UINT8,
 
         ARBITRARY_TYPE_INT16,
@@ -607,6 +609,8 @@ namespace profiler {
             uint8_t sizeOfValue(ArbitraryType type)
             {
                 switch (type) {
+                    case ARBITRARY_TYPE_BOOL: return 1;
+
                     case ARBITRARY_TYPE_INT8: return 1;
                     case ARBITRARY_TYPE_UINT8: return 1;
 
@@ -648,31 +652,28 @@ namespace profiler {
                 if(!m_value)
                     m_value = new char[sizeof(T)];
 
-                memset(m_value,&value,sizeof(T));
+                memcpy((void*)m_value, &value, sizeof(T));
 
             }
 
-            template <class T>
-            void setValue(T value)
-            {
+            void setValue(bool value) { m_type = ARBITRARY_TYPE_BOOL; fillValue(value); }
 
-                if (std::is_same<T, int8_t>::value)      { m_type = ARBITRARY_TYPE_INT8; fillValue(value); }
-                else if (std::is_same<T, uint8_t>::value) { m_type = ARBITRARY_TYPE_UINT8; fillValue(value); }
+            void setValue(int8_t value) { m_type = ARBITRARY_TYPE_INT8; fillValue(value); }
+            void setValue(uint8_t value) { m_type = ARBITRARY_TYPE_UINT8; fillValue(value); }
 
-                else if (std::is_same<T, int16_t>::value) { m_type = ARBITRARY_TYPE_INT16; fillValue(value); }
-                else if (std::is_same<T, uint16_t>::value) { m_type = ARBITRARY_TYPE_UINT16; fillValue(value); }
+            void setValue(int16_t value) { m_type = ARBITRARY_TYPE_INT16; fillValue(value); }
+            void setValue(uint16_t value) { m_type = ARBITRARY_TYPE_UINT16; fillValue(value); }
 
-                else if (std::is_same<T, int32_t>::value) { m_type = ARBITRARY_TYPE_INT32; fillValue(value); }
-                else if (std::is_same<T, uint32_t>::value) { m_type = ARBITRARY_TYPE_UINT32; fillValue(value); }
+            void setValue(int32_t value) { m_type = ARBITRARY_TYPE_INT32; fillValue(value); }
+            void setValue(uint32_t value) { m_type = ARBITRARY_TYPE_UINT32; fillValue(value); }
 
-                else if (std::is_same<T, int64_t>::value) { m_type = ARBITRARY_TYPE_INT64; fillValue(value); }
-                else if (std::is_same<T, uint64_t>::value) { m_type = ARBITRARY_TYPE_UINT64; fillValue(value); }
+            void setValue(int64_t value) { m_type = ARBITRARY_TYPE_INT64; fillValue(value); }
+            void setValue(uint64_t value) { m_type = ARBITRARY_TYPE_UINT64; fillValue(value); }
 
-                else if (std::is_same<T, float>::value) { m_type = ARBITRARY_TYPE_FLOAT; fillValue(value); }
-                else if (std::is_same<T, double>::value) { m_type = ARBITRARY_TYPE_DOUBLE; fillValue(value); }
+            void setValue(float value) { m_type = ARBITRARY_TYPE_FLOAT; fillValue(value); }
+            void setValue(double value) { m_type = ARBITRARY_TYPE_DOUBLE; fillValue(value); }
 
 
-            }
         };
 
         uint32_t m_countOfValues;
