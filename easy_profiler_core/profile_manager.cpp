@@ -1661,6 +1661,7 @@ void ProfileManager::listen(uint16_t _port)
 
         EASY_EVENT("ClientConnected", EASY_COLOR_INTERNAL_EVENT, profiler::OFF);
         hasConnect = true;
+        socket.setReplySocketBlocking(false);
 
         EASY_LOGMSG("GUI-client connected\n");
 
@@ -1674,7 +1675,7 @@ void ProfileManager::listen(uint16_t _port)
 #endif
             const profiler::net::EasyProfilerStatus connectionReply(m_profilerStatus.load(std::memory_order_acquire) == EASY_PROF_ENABLED, m_isEventTracingEnabled.load(std::memory_order_acquire), wasLowPriorityET);
             bytes = socket.send(&connectionReply, sizeof(profiler::net::EasyProfilerStatus));
-            hasConnect = bytes > 0;
+            hasConnect = bytes > 0 || (socket.state() == EasySocket::CONNECTION_STATE_TRY_AGAIN);
         }
 
         while (hasConnect && !m_stopListen.load(std::memory_order_acquire))
@@ -1683,7 +1684,7 @@ void ProfileManager::listen(uint16_t _port)
 
             bytes = socket.receive(buffer, 255);
 
-            hasConnect = bytes > 0;
+            hasConnect = bytes > 0 || (socket.state() == EasySocket::CONNECTION_STATE_TRY_AGAIN);
 
             char *buf = &buffer[0];
 
@@ -1709,7 +1710,7 @@ void ProfileManager::listen(uint16_t _port)
                         avgDuration = TICKS_TO_US(avgDuration);
                         const profiler::net::TimestampMessage reply(profiler::net::MESSAGE_TYPE_REPLY_MAIN_FRAME_TIME_MAX_AVG_US, (uint32_t)maxDuration, (uint32_t)avgDuration);
                         bytes = socket.send(&reply, sizeof(profiler::net::TimestampMessage));
-                        hasConnect = bytes > 0;
+                        hasConnect = bytes > 0 || (socket.state() == EasySocket::CONNECTION_STATE_TRY_AGAIN);
                         break;
                     }
 
@@ -1730,7 +1731,7 @@ void ProfileManager::listen(uint16_t _port)
 
                         replyMessage.type = profiler::net::MESSAGE_TYPE_REPLY_START_CAPTURING;
                         bytes = socket.send(&replyMessage, sizeof(replyMessage));
-                        hasConnect = bytes > 0;
+                        hasConnect = bytes > 0 || (socket.state() == EasySocket::CONNECTION_STATE_TRY_AGAIN);
 
                         break;
                     }
@@ -1772,7 +1773,7 @@ void ProfileManager::listen(uint16_t _port)
                                 os.clear();
 
                                 bytes = socket.send(sendbuf.c_str(), packet_size);
-                                hasConnect = bytes > 0;
+                                hasConnect = bytes > 0 || (socket.state() == EasySocket::CONNECTION_STATE_TRY_AGAIN);
                             }
                             else
                             {
@@ -1786,7 +1787,7 @@ void ProfileManager::listen(uint16_t _port)
 
                         replyMessage.type = profiler::net::MESSAGE_TYPE_REPLY_BLOCKS_END;
                         bytes = socket.send(&replyMessage, sizeof(replyMessage));
-                        hasConnect = bytes > 0;
+                        hasConnect = bytes > 0 || (socket.state() == EasySocket::CONNECTION_STATE_TRY_AGAIN);
 
                         break;
                     }
@@ -1837,7 +1838,7 @@ void ProfileManager::listen(uint16_t _port)
                                 os.clear();
 
                                 bytes = socket.send(sendbuf.c_str(), packet_size);
-                                hasConnect = bytes > 0;
+                                hasConnect = bytes > 0 || (socket.state() == EasySocket::CONNECTION_STATE_TRY_AGAIN);
                             }
                             else
                             {
@@ -1851,7 +1852,7 @@ void ProfileManager::listen(uint16_t _port)
 
                         replyMessage.type = profiler::net::MESSAGE_TYPE_REPLY_BLOCKS_DESCRIPTION_END;
                         bytes = socket.send(&replyMessage, sizeof(replyMessage));
-                        hasConnect = bytes > 0;
+                        hasConnect = bytes > 0 || (socket.state() == EasySocket::CONNECTION_STATE_TRY_AGAIN);
 
                         break;
                     }

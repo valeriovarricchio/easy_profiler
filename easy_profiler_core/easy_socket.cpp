@@ -145,6 +145,11 @@ void EasySocket::checkResult(int result)
 #endif
             m_state = CONNECTION_STATE_DISCONNECTED;
             break;
+#ifndef _WIN32
+        case EAGAIN:
+            m_state = CONNECTION_STATE_TRY_AGAIN;
+            break;
+#endif
         case CONNECTION_IN_PROGRESS:
             m_state = CONNECTION_STATE_IN_PROGRESS;
             break;
@@ -268,7 +273,7 @@ int EasySocket::accept()
         //int flag = 1;
         //int result = setsockopt(m_replySocket,IPPROTO_TCP,TCP_NODELAY,(char *)&flag,sizeof(int));
 
-        //setBlocking(m_replySocket,true);
+        //setBlocking(m_replySocket,false);
     }
     return (int)m_replySocket;
 }

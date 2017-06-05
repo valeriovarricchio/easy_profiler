@@ -78,7 +78,8 @@ public:
         CONNECTION_STATE_SUCCESS,
 
         CONNECTION_STATE_DISCONNECTED,
-        CONNECTION_STATE_IN_PROGRESS
+        CONNECTION_STATE_IN_PROGRESS,
+        CONNECTION_STATE_TRY_AGAIN
     };
 
 private:
@@ -123,6 +124,8 @@ public:
         return  m_state == CONNECTION_STATE_UNKNOWN ||
                 m_state == CONNECTION_STATE_DISCONNECTED;
     }
+
+    void setReplySocketBlocking(bool block){setBlocking(m_replySocket,block);}
 };
 
 #endif // EASY________SOCKET_________H
